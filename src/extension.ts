@@ -52,8 +52,17 @@ function getRepoHeadName(workspaceUri: vscode.Uri): string {
   }
 
   const api = gitExtension.getAPI(1);
-  const { repositories } = api;
-  const headName = repositories[0].repository.HEAD.name;
+  const repository =
+    api.getRepository(workspaceUri) ?? api.repositories[0];
+
+  if (!repository) {
+    vscode.window.showErrorMessage(
+      "Open in Gitlab: No git repository found for this file."
+    );
+    return "";
+  }
+
+  const headName = repository.state.HEAD?.name;
 
   if (!headName) {
     vscode.window.showErrorMessage(
